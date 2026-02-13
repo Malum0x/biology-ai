@@ -29,7 +29,7 @@ class CausalSelfAttention(nn.Module):
         without cheating """
     def __init__(self, config):
         super().__init__()
-        assert config.n_embed % config.n_head == 0 # embedding dimension must divide evenly across heads, so each head gets equal slice (modulo %)
+        assert config.n_embd % config.n_head == 0 # embedding dimension must divide evenly across heads, so each head gets equal slice (modulo %)
         self.c_attn = nn.Linear(config.n_embd, 3 * config.n_embd, bias=config.bias) # the linear layer that creates Q, K, V
         self.c_proj = nn.Linear(config.n_embd, config.n_embd, bias=config.bias) # Output Projection
         self.attn_dropout = nn.Dropout(config.dropout) #Dropout randomly set some values to zero during training, prevents overfitting 
@@ -80,7 +80,7 @@ class MLP(nn.Module):
         super().__init__()
         self.c_fc = nn.Linear(config.n_embd, 4 * config.n_embd, bias=config.bias) # linear layer, expands dimensions
         self.gelu = nn.GELU() #Activation Function 
-        self.c_proj = nn.Linear(4 * config,n_embd, config.n_embd, bias=config.bias) # linear layer that projects output back
+        self.c_proj = nn.Linear(4 * config.n_embd, config.n_embd, bias=config.bias) # linear layer that projects output back
         self.dropout = nn.Dropout(config.dropout) # dropout is known 
 
     def forward(self, x): 
@@ -126,8 +126,8 @@ class GPT(nn.Module):
 
         self.transformer = nn.ModuleDict = nn.ModuleDict(dict(           # transformer
             wte = nn.Embedding(config.vocab_size, config.n_embd),
-            wpe = nn.Embedding(config.block_size, config.n_embd)
-            drop = nn.Dropout(config.dropout)
+            wpe = nn.Embedding(config.block_size, config.n_embd),
+            drop = nn.Dropout(config.dropout),
             h = nn.ModuleList([Block(config) for _ in range (config.n_layer)]), 
             ln_f = LayerNorm(config.n_embd, bias=config.bias)
 
@@ -159,7 +159,7 @@ class GPT(nn.Module):
     def forward(self, idx, targets=None):
         device = idx.device
         b, t = idx.size()
-        assert t <= self.config.block_size f"Cannot forward sequence length {t}, block size is only {self.config.block_size}"
+        assert t <= self.config.block_size, f"Cannot forward sequence length {t}, block size is only {self.config.block_size}"
         pos = torch.arange(0, t, dtype=torch.long, device=device)
 
         tok_emb = self.transformer.wte(idx)
@@ -252,7 +252,7 @@ class GPT(nn.Module):
         decay_params  = [p for n, p in param_dict.items() if p.dim() >= 2]
         nodecay_params = [p for n, p in param_dict.items() if p.dim() < 2]
         optim_groups = [
-            {'params': decay_params, 'weight_decay': weight_decay}
+            {'params': decay_params, 'weight_decay': weight_decay},
             {'params': nodecay_params, 'weight_decay': 0.0}
         ]
         num_decay_params = sum(p.numel() for p in decay_params)
