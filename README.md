@@ -1,10 +1,10 @@
 # biology-ai
 custom architecture:
     - architecture is taken from nanogpt 
-    - adjustments and details are here: (to do)
+    - adjustments and details are here: (to do) 
 biology focused LLM: (to do)
-    -
-    -
+    - 
+    - 
 # steps: 
 First attempt were to understand the model - created structure itself, added some # to understand the code more. I will be testing it, want to adjust it for my computations too.
 
